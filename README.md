@@ -9,3 +9,9 @@ Oyun devam edecek (Time.timeScale = 1)
 Arka plan normale dönecek
 Kapı kapanma sesi çalacak
 Panel kaybolacak
+Her görev başlangıçta kilitli olacak (ilk görev hariç)
+Görev tamamlandığında:
+Görev tamamlama sesi çalacak
+Bir sonraki görev otomatik olarak açılacak
+Kilitli görevler için özel mesaj gösterilecek
+Tüm görevler tamamlandığında tebrik mesajı gösterilecek
