@@ -26,6 +26,9 @@ public class QuestManager : MonoBehaviour
     [Header("Quest Data")]
     [SerializeField] private List<Quest> quests = new List<Quest>();
     
+    [Header("References")]
+    [SerializeField] private HintManager hintManager;
+    
     private int currentQuestIndex = 0;
     private bool isQuestPanelVisible = false;
     private Vector3 hiddenScale;
@@ -56,6 +59,12 @@ public class QuestManager : MonoBehaviour
             return;
         }
         
+        if (hintManager == null)
+        {
+            Debug.LogError("Hint Manager reference is missing!");
+            return;
+        }
+        
         panelRectTransform = questPanel.GetComponent<RectTransform>();
         visibleScale = Vector3.one;
         hiddenScale = Vector3.zero;
@@ -74,9 +83,79 @@ public class QuestManager : MonoBehaviour
     
     private void InitializeQuests()
     {
+        // Görev 1: Eşyaların Bulunması
+        AddNewQuest(
+          
+            "Çevredeki eşyaları toplayarak hayatta kalmak için gerekli malzemeleri bulmalısın. Fenerin bataryası ve harita parçası gibi eşyalar senin için çok değerli olacak.\n\n",
+            3 // Toplam 3 eşya toplanacak
+        );
+
+        // Görev 2: Güvenli Bir Yer Bulmak
+        AddNewQuest(
+           
+            "Kendini korumak için güvenli bir yer bulmalısın. Kilitli bir eve sığınmak ve bu evin kilidini açacak bir anahtar bulmak zorundasın.\n\n",
+            2 // Anahtar bulma ve eve girme
+        );
+
+        // Görev 3: Lanetin Bulunması
+        AddNewQuest(
+           
+            "Evden çıkarak kiliseye gitmeli ve burada kilitli bodrumu açmak için bir şifre bulmalısın.\n\n",
+            2 // Şifreyi bulma ve bodrumu açma
+        );
+
+        // Görev 4: Radyo Kulesi
+        AddNewQuest(
+          
+            "Radyo kulesine gidip şifreyi çözerek dış dünyaya bağlantı kurmaya çalışmalısın.\n\nİpucu: Şifreyi doğru girmezsen, hala içeridesin.",
+            2 // Radyo kulesine ulaşma ve şifreyi çözme
+        );
+
+        // Görev 5: Doktorun Evi
+        AddNewQuest(
+            
+            "Terk edilmiş doktor evine girip notlar ve günlükler bulmalısın. Kaybolan kişiyle bağlantıları çözmelisin.\n\n",
+            3 // Notları bulma, günlükleri okuma ve bağlantıları çözme
+        );
+
+        // Görev 6: Lanetin Çözümü – Çıkış Yolu
+        AddNewQuest(
+            
+            "Lanet hakkında eski belgeleri inceleyerek, çözüm için gerekli üç objeyi bulmalısın.\n\n",
+            3 // Üç objeyi bulma: Kolye, harita parçası ve ritüel kitabı
+        );
+
+        // Görev 7: Eski Kilise – Lanetin Gerçek Yüzü
+        AddNewQuest(
+            "Eski Kilise – Lanetin Gerçek Yüzü",
+            "Kiliseye giderek, Murpheus'un geçmişini öğrenmek ve lanetin doğasını anlamalısın.\n\n",
+            2 // Murpheus'un geçmişini öğrenme ve lanetin doğasını anlama
+        );
+
+        // Görev 8: Ritüel İçin Hazırlık
+        AddNewQuest(
+
+            "Çeşitli bulmacalar çözerek, ritüel için gerekli objeleri toplamak ve ipuçlarını birleştirmelisin.\n\n",
+            3 // Bulmacaları çözme ve objeleri doğru sırayla yerleştirme
+        );
+
+        // Görev 9: Murpheus'u Bulmak
+        AddNewQuest(
+         
+            "Murpheus'un yerini keşfederek lanetin sonuna yaklaşmalısın.\n\n",
+            2 // Murpheus'un izlerini takip etme ve yerini bulma
+        );
+
+        // Görev 10: Son Karar Noktası
+        AddNewQuest(
+          
+            "Ritüel alanında, önceki görevlerden toplanan objeleri kullanarak laneti kırmak için bir ritüel gerçekleştirmelisin.\n\n",
+            2 // Ritüeli gerçekleştirme ve son kararı verme
+        );
+
+        // İlk görevi aktif et
         if (quests.Count > 0)
         {
-            // İlk görevi aktif et
             quests[0].isUnlocked = true;
             UpdateQuestUI();
         }
@@ -179,6 +258,12 @@ public class QuestManager : MonoBehaviour
         float progress = (float)currentQuest.currentStep / currentQuest.totalSteps;
         progressBar.value = progress * progressBar.maxValue;
         progressText.text = $"{Mathf.RoundToInt(progress * 100)}%";
+        
+        // İpucunu göster
+        if (hintManager.IsHintAvailable())
+        {
+            hintManager.ShowHint(currentQuestIndex);
+        }
     }
     
     public void AdvanceQuestStep()
@@ -249,4 +334,4 @@ public class QuestManager : MonoBehaviour
     {
         return currentQuestIndex;
     }
-}
+} 
