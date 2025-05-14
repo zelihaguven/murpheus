@@ -1,4 +1,4 @@
-sing UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using TMPro;
@@ -20,6 +20,7 @@ public class QuestManager : MonoBehaviour
     [Header("Audio")]
     [SerializeField] private AudioClip openSound;
     [SerializeField] private AudioClip closeSound;
+    [SerializeField] private AudioClip questCompleteSound;
     [SerializeField] private AudioSource audioSource;
     
     [Header("Quest Data")]
@@ -44,6 +45,7 @@ public class QuestManager : MonoBehaviour
         public int totalSteps = 1;
         public int currentStep = 0;
         public bool isCompleted = false;
+        public bool isUnlocked = false;
     }
     
     private void Start()
@@ -66,9 +68,16 @@ public class QuestManager : MonoBehaviour
         panelRectTransform.localScale = hiddenScale;
         questPanel.SetActive(false);
         
-        // Initialize with first quest if available
+        // Initialize quests
+        InitializeQuests();
+    }
+    
+    private void InitializeQuests()
+    {
         if (quests.Count > 0)
         {
+            // İlk görevi aktif et
+            quests[0].isUnlocked = true;
             UpdateQuestUI();
         }
     }
@@ -146,14 +155,23 @@ public class QuestManager : MonoBehaviour
     {
         if (quests.Count == 0 || currentQuestIndex >= quests.Count)
         {
-            questTitleText.text = "Görev Yok";
-            questDescriptionText.text = "Tüm görevler tamamlandı.";
+            questTitleText.text = "Tüm Görevler Tamamlandı!";
+            questDescriptionText.text = "Tebrikler! Tüm görevleri başarıyla tamamladınız.";
             progressBar.value = progressBar.maxValue;
             progressText.text = "100%";
             return;
         }
         
         Quest currentQuest = quests[currentQuestIndex];
+        
+        if (!currentQuest.isUnlocked)
+        {
+            questTitleText.text = "Görev Kilitli";
+            questDescriptionText.text = "Bu görevi görmek için önceki görevi tamamlamalısınız.";
+            progressBar.value = 0;
+            progressText.text = "0%";
+            return;
+        }
         
         questTitleText.text = currentQuest.title;
         questDescriptionText.text = currentQuest.description;
@@ -163,25 +181,34 @@ public class QuestManager : MonoBehaviour
         progressText.text = $"{Mathf.RoundToInt(progress * 100)}%";
     }
     
-    // Public methods to control quests from other scripts
-    
     public void AdvanceQuestStep()
     {
         if (quests.Count == 0 || currentQuestIndex >= quests.Count)
             return;
             
         Quest currentQuest = quests[currentQuestIndex];
+        
+        if (!currentQuest.isUnlocked)
+            return;
+            
         currentQuest.currentStep++;
         
         if (currentQuest.currentStep >= currentQuest.totalSteps)
         {
             currentQuest.isCompleted = true;
-            currentQuest.currentStep = currentQuest.totalSteps; // Ensure we don't go over
+            currentQuest.currentStep = currentQuest.totalSteps;
             
-            // Move to next quest automatically
+            // Görev tamamlama sesi
+            if (audioSource != null && questCompleteSound != null)
+            {
+                audioSource.PlayOneShot(questCompleteSound);
+            }
+            
+            // Bir sonraki görevi aç
             if (currentQuestIndex < quests.Count - 1)
             {
                 currentQuestIndex++;
+                quests[currentQuestIndex].isUnlocked = true;
             }
         }
         
@@ -196,24 +223,30 @@ public class QuestManager : MonoBehaviour
             description = description,
             totalSteps = totalSteps,
             currentStep = 0,
-            isCompleted = false
+            isCompleted = false,
+            isUnlocked = false
         };
         
         quests.Add(newQuest);
         
-        // If this is the first quest, update UI
+        // İlk görev ise otomatik olarak aç
         if (quests.Count == 1)
         {
+            newQuest.isUnlocked = true;
             UpdateQuestUI();
         }
     }
     
-    public void SetCurrentQuest(int index)
+    public bool IsCurrentQuestCompleted()
     {
-        if (index >= 0 && index < quests.Count)
-        {
-            currentQuestIndex = index;
-            UpdateQuestUI();
-        }
+        if (quests.Count == 0 || currentQuestIndex >= quests.Count)
+            return true;
+            
+        return quests[currentQuestIndex].isCompleted;
+    }
+    
+    public int GetCurrentQuestIndex()
+    {
+        return currentQuestIndex;
     }
 }
